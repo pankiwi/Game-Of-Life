@@ -1,15 +1,13 @@
-import SettingsUi from "/src/class/SettingsUi.js";
-import MapTileObjects from "/src/class/MapTileObjects.js";
-import Cell from "/src/class/Cell.js";
+"use strict";
 
-export default class Game {
+class Game {
   loop = null;
   canUpdate = true;
   sleepUpdate = 0;
+  updateTime = 20;
   constructor(canvasId) {
     this.canvas = document.getElementById(canvasId);
     this.ctx = this.canvas.getContext("2d");
-    this.settingUi = new SettingsUi("setting-ui");
     this.init();
   };
   //on start game
@@ -18,25 +16,21 @@ export default class Game {
   };
   //init
   init() {
-    //add Event
-    this.canvas.addEventListener("click", this.click, false);
-    this.canvas.addEventListener("dragstart",() =>  this.settingUi.showSettings(), false);
-    
     //set width and height canvas
     this.canvas.width = innerWidth
     this.canvas.height = innerHeight;
     //rows and colmns 
-    this.mapWidth = Math.floor(Math.max(this.canvas.width / window.vars.tileSize));
-    this.mapHeight = Math.floor(Math.max(this.canvas.height / window.vars.tileSize));
-    this.padding = this.toY((this.toTileX(innerWidth) + this.toTileY(innerHeight)) - (this.mapWidth + this.mapHeight));
+    this.mapWidth = Math.floor(Math.max(this.canvas.width / tileSize));
+    this.mapHeight = Math.floor(Math.max(this.canvas.height / tileSize));
 
     this.map = new MapTileObjects(this.mapWidth, this.mapHeight);
+    
     this.createCells();
   };
   //tick function
   tick() {
     this.sleepUpdate += 1;
-    if (this.sleepUpdate >= window.vars.updateTime && this.canUpdate) {
+    if (this.updateTime < 0 || (this.sleepUpdate >= this.updateTime && this.canUpdate)) {
       this.sleepUpdate = 0;
       this.update();
     }
@@ -57,7 +51,8 @@ export default class Game {
     this.map.forEach((value) => { value.swichtState() });
   };
   drawBackground(ctx) {
-    ctx.fillStyle = "white";
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    ctx.fillStyle = getPalet().background;
     ctx.fillRect(0, 0, innerWidth, innerHeight);
   };
   /*
@@ -78,11 +73,11 @@ export default class Game {
     for (let y = 0; y <= this.mapHeight; y++) {
       for (var x = 0; x <= this.mapWidth; x++) {
         ctx.beginPath();
-        ctx.moveTo(x * window.vars.tileSize, 0);
-        ctx.lineTo(x * window.vars.tileSize, innerHeight);
-        ctx.moveTo(0, y * window.vars.tileSize);
-        ctx.lineTo(innerWidth, y * window.vars.tileSize);
-        ctx.strokeStyle = window.vars.darkMode ? "#1E202C" : "white";
+        ctx.moveTo(x * tileSize, 0);
+        ctx.lineTo(x * tileSize, innerHeight);
+        ctx.moveTo(0, y * tileSize);
+        ctx.lineTo(innerWidth, y * tileSize);
+        ctx.strokeStyle = getPalet().hex;
         ctx.lineWidth = 2;
         ctx.stroke();
       }
@@ -98,14 +93,14 @@ export default class Game {
     ctx.lineTo(innerWidth, 0);
     ctx.moveTo(0, innerHeight);
     ctx.lineTo(innerWidth, innerHeight);
-    ctx.strokeStyle = window.vars.darkMode ? "#1E202C" : "white";
-    ctx.lineWidth = this.padding;
+    ctx.strokeStyle = getPalet().hex;
+    ctx.lineWidth = 10 * innerWidth/innerHeight;
     ctx.stroke();
   };
   createCells() {
     for (let y = 0; y <= this.mapHeight; y++) {
       for (let x = 0; x <= this.mapWidth; x++) {
-        this.map.setObjectPos(x, y, new Cell(this.toX(x), this.toY(y)));
+        this.map.setObjectPos(x, y, new Cell(this.worldCoord(x), this.worldCoord(y)));
       }
     }
   };
@@ -118,6 +113,13 @@ export default class Game {
   getEnumNeighbors(x, y) {
     return this.getAliveCell(x - 1, y) + this.getAliveCell(x + 1, y) + this.getAliveCell(x, y - 1) + this.getAliveCell(x, y + 1) + this.getAliveCell(x - 1, y - 1) + this.getAliveCell(x + 1, y + 1) + this.getAliveCell(x + 1, y - 1) + this.getAliveCell(x - 1, y + 1);
   };
+  getAliveCell(x = 0, y = 0) {
+    let cell = this.getCell(x, y);
+    return cell != null && cell.state ? 1 : 0;
+  };
+  getCell(x = 0, y = 0) {
+    return this.map.getObjectPos(x, y);
+  };
   stopLoop() {
     window.cancelAnimationFrame(this.loop);
     this.sleepUpdate = 0;
@@ -128,50 +130,16 @@ export default class Game {
   turnCanUpdate() {
     this.canUpdate = !this.canUpdate;
   };
-  resetCells() {
-    this.map.forEach((cell) => {
-      cell.setState(false);
-    });
-    this.sleepUpdate = 0;
+  worldCoord(number = 0) {
+    return number * tileSize;
   };
-  getAliveCell(x, y) {
-    let cell = this.getCell(x, y);
-
-    return cell != null && cell.state ? 1 : 0;
+  worldTile(number = 0) {
+    return number / tileSize;
   };
-  getCell(x, y) {
-    return this.map.getObjectPos(x, y);
+  getCanvas(){
+    return this.canvas;
   };
-  generationRandomState() {
-    this.map.forEach((cell) => {
-      cell.setState(Math.random() < 0.5);
-    })
-  };
-  click(event = Event) {
-    if (event.layerX || event.layerX == 0) {
-      event._x = event.layerX;
-      event._y = event.layerY;
-    } else if (event.offsetX || event.offsetX == 0) {
-      event._x = event.offsetX;
-      event._y = event.offsetY;
-    }
-
-    let x = Math.floor(window.game.toTileX(event._x)),
-      y = Math.floor(window.game.toTileY(event._y));
-    let cell = window.game.map.getObjectPos(x, y);
-
-    cell.setState(!cell.state);
-  };
-  toX(x) {
-    return x * window.vars.tileSize;
-  };
-  toY(y) {
-    return y * window.vars.tileSize;
-  };
-  toTileX(x) {
-    return x / window.vars.tileSize;
-  };
-  toTileY(y) {
-    return y / window.vars.tileSize;
+  getCtx(){
+    return this.ctx;
   };
 }

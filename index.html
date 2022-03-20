@@ -4,51 +4,71 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Google -->
+  <meta itemprop="name" content="Game of life simulation" />
+  <meta itemprop="description" content="Game of life simulation of life cycles cells, on based game by john conway" />
+  <meta itemprop="image" content="https://github.com/pankiwi/Game-Of-Life/blob/main/icon.jpg" />
+  
   <title>Game of life</title>
+  <!-- style libs -->
+  <link rel="stylesheet" href="/assets/fontawesome/css/all.min.css">
+  <link rel="stylesheet" href="/assets/libs/DialogStyle.css">
+  <!-- style -->
   <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="/assets/fontawesome/css/all.css">
 </head>
 
 <body>
-  <canvas id="canvas" width="1" height="1" draggable="true"></canvas>
+  <canvas id="canvas" width="1" height="1" draggable="true" ondragstart="functionsUi.display()"></canvas>
 
-  <div class="settings" id="setting-ui">
+  <div class="settings" id="setting" >
 
-    <button class="btn btnF1" id="btn-1">
+    <button class="btn btnF1" id="btn-1" onclick="functionsUi.hidden()">
       <span class="fa fa-xmark"></span>
     </button>
 
-    <button class="btn btnF2" id="btn-2">
+    <button class="btn btnF2" id="btn-2" onclick="functionsUi.generationCells()">
       <span class="fa-solid fa-shuffle"></span>
     </button>
 
-    <button class="btn btnF3 on" id="btn-3">
+    <button class="btn btnF3 on" id="btn-3" onclick="functionsUi.switchUpdate(false)">
       <span class="fa fa-hourglass"></span>
     </button>
 
-    <button class="btn btnF4" id="btn-4">
+    <button class="btn btnF4" id="btn-4" onclick="functionsUi.clearMap()">
       <span class="fa fa-arrows-rotate"></span>
     </button>
 
-    <button class="btn btnF5" id="btn-5">
+    <button class="btn btnF5" id="btn-5" onclick="functionsUi.setTimeUpdate()">
       <span class="fa fa-clock"></span>
     </button>
 
-    <button class="btn btnF6 dark" id="btn-6">
-      <span class= "fa-solid fa-moon"></span>
+    <button class="btn btnF6 dark" id="btn-6" onclick="functionsUi.switchMode(false)">
+      <span class="fa-solid fa-moon"></span>
     </button>
 
-    <button class="btn btnF7" id="btn-7">
-      <span class="fa-brands fa-github-alt"></span>
+    <button class="btn btnF7" id="btn-7" onclick="functionsUi.github()">
+      <span class="fa-brands fa-github-alt" style="color:white"></span>
     </button>
 
-    <button class="btn btnF8" id="btn-8">
+    <button class="btn btnF8" id="btn-8" onclick="functionsUi.informationControls()">
       <span class="fa-solid fa-info"></span>
+    </button>
+    
+    <button class="btn btnF9" id="btn-9" onclick="functionsUi.informationGame()">
+      <span class="fa-solid fa-question"></span>
     </button>
 
   </div>
-  <script src="./src/index.js" type="module"></script>
-  
+  <!-- libs -->
+  <script src="./src/libs/Dialog.js"></script>
+  <!-- code -->
+  <script src="./src/class/CustomDialog.js" type="text/javascript" charset="utf-8"></script>
+  <script src="./src/class/Cell.js" type="text/javascript" charset="utf-8"></script>
+  <script src="./src/class/MapTileObjects.js" type="text/javascript" charset="utf-8"></script>
+  <script src="./src/class/Game.js" type="text/javascript" charset="utf-8"></script>
+  <script src="./src/ui.js" type="text/javascript" charset="utf-8"></script>
+    <script src="./src/index.js" type="text/javascript" charset="utf-8"></script>
+
 </body>
 
 </html>

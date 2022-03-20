@@ -1,27 +1,45 @@
-export default class Cell {
+"use strict"
+
+class Cell {
   constructor(x, y) {
     this.x = x;
     this.y = y;
     this.state = false;
     this.nextState = false;
+    this.lastState = null;
+  };
+  color() {
+    if (!this.state && this.lastState) return getPalet().cell[1];
+
+    if (this.state && !this.lastState) return getPalet().cell[2];
+    if (this.state && this.lastState) return getPalet().cell[3];
+
+    if (!this.state) return getPalet().cell[0];
   };
   draw(ctx) {
-    ctx.fillStyle = this.state ? window.vars.darkMode ? "#0015FF" : "#B1B8FF" : window.vars.darkMode ? "#2F3145" : "#EBEBEB";
-    ctx.fillRect(this.x, this.y, window.vars.tileSize, window.vars.tileSize);
+    ctx.fillStyle = this.color();
+    ctx.fillRect(this.x, this.y, tileSize, tileSize);
   };
-  setNextState(state = Boolean) {
+  setNextState(state = false) {
     this.nextState = state;
   };
-  setState(state = Boolean) {
+  setLastState(state = false) {
+    this.lastState = state;
+  };
+  setState(state = false) {
+    this.lastState = this.state;
     this.nextState = this.state = state;
   };
+  setStrictState(state = false){
+    this.lastState = this.nextState = this.state = state;
+  }
   swichtState() {
     this.setState(this.nextState);
   };
   tileX() {
-    return this.x / window.vars.tileSize;
+    return this.x / tileSize;
   };
   tileY() {
-    return this.y / window.vars.tileSize;
+    return this.y / tileSize;
   };
 }
